@@ -3,6 +3,13 @@ description: 'Runs msys2-tests'
 runs:
   using: 'composite'
   steps:
+    - name: 'Show mount table'
+      shell: msys2 {0}
+      run: | 
+        mount
+        if [[ -d /tmp ]]; then "/tmp exists"; else "/tmp does not exist"; fi
+        if [[ -d /usr ]]; then "/usr exists"; else "/usr does not exist"; fi
+
     - shell: msys2 {0}
       run: |
         . '${{ github.action_path }}/group_helper.sh' "test: toolchain"
