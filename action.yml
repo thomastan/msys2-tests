@@ -10,7 +10,7 @@ runs:
         echo TMP was $TMP
         myTMPDIR="${{ runner.temp }}"
         if [[ "$myTMPDIR" =~ ([a-zA-Z]):(.*) ]]; then
-          export myTMPDIR="${BASH_REMATCH[1],,}/${BASH_REMATCH[2]//\\//}"
+          export myTMPDIR="/${BASH_REMATCH[1],,}${BASH_REMATCH[2]//\\//}"
           echo "myTMPDIR is now $myTMPDIR"
         else
           echo "Setting TMPDIR to $TMPDIR"
