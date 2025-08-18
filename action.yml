@@ -8,8 +8,14 @@ runs:
       run: | 
         mount
         echo TMP was $TMP
-        mount -o bind ${{ runner.temp }} /tmp
-        echo "TMP=${{ runner.temp }}" >> $GITHUB_ENV
+        myTMPDIR="${{ runner.temp }}"
+        if [[ "$TMPDIR" =~ ([a-zA-Z]):(.*) ]]; then
+          export myTMPDIR="${BASH_REMATCH[1],,}/${BASH_REMATCH[2]//\\//}"
+          echo "myTMPDIR is now $myTMPDIR"
+        else
+          echo "Setting TMPDIR to $TMPDIR"
+        fi
+        mount -o bind $myTMPDIR /tmp
         echo GitHub env: $GITHUB_ENV
         echo cat GITHUB_ENV: $GITHUB_ENV
         if [[ -d /tmp ]]; then "/tmp exists"; else "/tmp does not exist"; fi
@@ -17,6 +23,7 @@ runs:
         if [[ -d /usr ]]; then "/usr exists"; else "/usr does not exist"; fi
         echo "Revised mount"
         mount
+        ls /usr /bin /tmp
 
     - shell: msys2 {0}
       run: |
