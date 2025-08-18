@@ -15,11 +15,13 @@ runs:
         else
           echo "Setting TMPDIR to $TMPDIR"
         fi
+        mkdir -p /tmp
+        mkdir -p $myTMPDIR
+        echo "Two mkdir's done"
         mount -o bind $myTMPDIR /tmp
         echo GitHub env: $GITHUB_ENV
         echo cat GITHUB_ENV: $GITHUB_ENV
         if [[ -d /tmp ]]; then "/tmp exists"; else "/tmp does not exist"; fi
-        mkdir /tmp
         if [[ -d /usr ]]; then "/usr exists"; else "/usr does not exist"; fi
         echo "Revised mount"
         mount
