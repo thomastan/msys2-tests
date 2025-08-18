@@ -10,12 +10,13 @@ runs:
         echo TMP was $TMP
         echo "TMP=${{ runner.temp }}" >> $GITHUB_ENV
         echo GitHub env: $GITHUB_ENV
+        cat $GITHUB_ENV
         echo "TMP now: $TMP"
         if [[ -d /tmp ]]; then "/tmp exists"; else "/tmp does not exist"; fi
         mount -o bind $TMP /tmp
         if [[ -d /tmp ]]; then "/tmp exists"; else "/tmp does not exist"; fi
         if [[ -d /usr ]]; then "/usr exists"; else "/usr does not exist"; fi
-        echo "Revied mount"
+        echo "Revised mount"
         mount
 
     - shell: msys2 {0}
