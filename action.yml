@@ -4,11 +4,11 @@ runs:
   using: 'composite'
   steps:
     - name: 'Show mount table'
-      shell: msys2 {0}
+      shell: D:/a/_temp/msys64/usr/bin/bash.exe {0}
       run: | 
         echo "Fstab: "
-        echo "PATH: $PATH"
         cat /etc/fstab
+        echo "PATH: $PATH"
         mount
         echo TMP was $TMP
         myTMPDIR="${{ runner.temp }}"
