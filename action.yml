@@ -6,6 +6,8 @@ runs:
     - name: 'Show mount table'
       shell: msys2 {0}
       run: | 
+        echo "Fstab: "
+        cat /etc/fstab
         mount
         echo TMP was $TMP
         myTMPDIR="${{ runner.temp }}"
