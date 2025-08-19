@@ -20,11 +20,8 @@ runs:
         mkdir -p /tmp
         mkdir -p $myTMPDIR
         echo "Two mkdir's done"
-        umount /tmp
-        echo "Unmounted /tmp"
-        mount -o bind $myTMPDIR /tmp
-        echo GitHub env: $GITHUB_ENV
-        echo cat GITHUB_ENV: $GITHUB_ENV
+        umount /tmp || echo "Unmount /tmp failed, continuing"
+        mount -o bind $myTMPDIR /tmp || echo "Mount /tmp failed, continuing"
         if [[ -d /tmp ]]; then echo "/tmp exists"; ls /tmp; else echo "/tmp does not exist"; fi
         if [[ -d /usr ]]; then echo "/usr exists"; ls /usr; else echo "/usr does not exist"; fi
         echo "Revised mount"
