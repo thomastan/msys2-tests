@@ -7,6 +7,7 @@ runs:
       shell: msys2 {0}
       run: | 
         echo "Fstab: "
+        echo "PATH: $PATH"
         cat /etc/fstab
         mount
         echo TMP was $TMP
