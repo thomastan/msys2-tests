@@ -2,11 +2,11 @@ name: 'Run msys2-tests'
 description: 'Runs msys2-tests'
 runs:
   using: 'composite'
-  env: 
+  env:
     MSYS2_PATH_TYPE: minimal
   steps:
     - name: 'Show mount table'
-      shell: /a/_temp/msys64/usr/bin/bash.exe {0}
+      shell: msys2 {0}
       run: | 
         echo "Fstab: "
         cat /etc/fstab
