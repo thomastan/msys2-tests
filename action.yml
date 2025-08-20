@@ -6,7 +6,7 @@ runs:
     - name: 'Show mount table'
       env:
         MSYS2_PATH_TYPE: minimal
-      shell: /a/_temp/msys64/usr/bin/bash {0}
+      shell: D:/a/_temp/msys64/usr/bin/bash {0}
       run: | 
         echo "Fstab: "
         cat /etc/fstab
