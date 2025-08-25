@@ -1,8 +1,55 @@
 name: 'Run msys2-tests'
 description: 'Runs msys2-tests'
+inputs:
+  github-token:
+    required: true
+    default: ${{ github.token }}
+
 runs:
   using: 'composite'
   steps:
+    - name: Download and extract minimal artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{ inputs.github-token }}
+        repo: thomastan/msys2-runtime
+        branch: relocate-root
+        name: install
+        workflow: build.yaml
+        workflow_conclusion: ""
+        path: "${{ runner.temp }}/msys64/tmp/"
+        check_artifacts: true
+
+    - name: Move bash.exe & msys-2.0.dll from $MSYS2_ROOT's /usr/bin to /bin
+      shell: cmd
+      run: |
+        @echo off
+        set "artifact=${{ runner.temp }}\msys64\tmp\usr\bin"
+        set "src=${{ runner.temp }}\msys64\usr\bin"
+        set "dest=${{ runner.temp }}\msys64\bin"
+        if not exist "%dest%" mkdir "%dest%"
+
+        move /y "%artifact%\msys-2.0.dll" "%dest%\"
+        del /q "%src%\msys-2.0.dll"
+        for %%f in (bash.exe sh.exe) do (
+          move /y "%src%\%%f" "%dest%\"
+        )
+
+    - name: Patch launcher script to use /bin/bash instead of /usr/bin/bash
+      shell: pwsh
+      run: |
+        # Search all drives rather than just that on which {{ runner.temp }} is located on
+        $launcher = "${{ runner.temp }}".Split(":")[1] + "\setup-msys2\msys2.CMD"
+        $drives = @('C'..'Z') | % { "${_}:" }
+        foreach ($drive in $drives) {
+          $path = $drive + $launcher
+          if (Test-Path $path) {
+            # String replace in the launcher script on this drive
+            (Get-Content $path) -replace '(.*msys64)\\usr(\\bin\\bash.exe)', '$1$2' | Set-Content $path
+            Get-Content $path
+          }
+        }
+
     - shell: msys2 {0}
       run: |
         . '${{ github.action_path }}/group_helper.sh' "test: toolchain"
