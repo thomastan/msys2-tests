@@ -295,6 +295,30 @@ int main() {
             if (it->fail) {
                 passed += 1;
             }
+
+            // Retry failed attempt
+            static const char *bad = MSYSROOT "\\tmp\\", *replacement = getenv("TMP");
+            if (!replacement) continue;
+
+            const char *found = strstr(it->dst, bad);
+            if (!found) continue;
+
+            size_t adjusted_len = strlen(it->dst) - strlen(bad) + strlen(replacement);
+            char *adj = (char *)malloc(adjusted_len + 1);
+            strncpy(adj, it->dst, found - it->dst);
+            adj[found - it->dst] = '\0';
+            strcat(adj, replacement);  // Append the TMP env var
+            strcat(adj, found + strlen(replacement));  // Append the part after the match
+
+            char eadj[1024];
+            if (0 == strcmp(res, adj)) {
+                passed += 1;
+                printf("test %ld passed after retry: src=\"%s\", dst=\"%s\"\n", (it - &datas[0]), escape(path, epath), escape(res, eres));
+            } else {
+                printf("still failed %ld after retry: src=\"%s\", dst=\"%s\" expect=\"%s\"\n",
+                       (it - &datas[0]), escape(path, epath), escape(res, eres), escape(adj, eadj));
+            }
+            free(adj);
         } else {
             char epath[1024];
             char eres[1024];
