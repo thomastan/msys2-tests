@@ -3,6 +3,13 @@ description: 'Runs msys2-tests'
 runs:
   using: 'composite'
   steps:
+    - name: Leak Windows %TEMP% variable accessible from msys2 side as $WINTEMP
+      shell: cmd
+      run: |
+        echo WINTEMP=%TEMP%>>%GITHUB_ENV%
+        @echo on
+        @type %GITHUB_ENV%
+
     - shell: msys2 {0}
       run: |
         . '${{ github.action_path }}/group_helper.sh' "test: toolchain"
