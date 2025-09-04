@@ -13,7 +13,7 @@ runs:
       with:
         github_token: ${{ inputs.github-token }}
         repo: thomastan/msys2-runtime
-        branch: relocate-root
+        branch: msys2-3.6.4-patched
         name: minimal
         workflow: build.yaml
         workflow_conclusion: ""
@@ -46,6 +46,13 @@ runs:
             Get-Content $path
           }
         }
+
+    - name: Leak Windows %TEMP% variable accessible from msys2 side as $WINTEMP
+      shell: cmd
+      run: |
+        echo WINTEMP=%TEMP%>>%GITHUB_ENV%
+        @echo on
+        @type %GITHUB_ENV%
 
     - shell: msys2 {0}
       run: |
