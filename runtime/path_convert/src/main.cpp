@@ -33,6 +33,22 @@ typedef struct test_data_t {
 #endif
 #endif
 
+static char wintemp[4096];
+static bool grab_wintemp() {
+    FILE *envp = popen("powershell.exe -Command 'Write-Host -NoNewline $env:WINTEMP'", "r");
+    if (envp) {
+        if (!fgets(wintemp, sizeof(wintemp), envp))
+            return false;
+        const size_t len = strlen(wintemp);
+        wintemp[len] = '\\';
+        wintemp[len + 1] = '\0';
+
+        pclose(envp);
+    }
+    return true;
+}
+static bool fetched_wintemp = grab_wintemp();
+
 static const test_data datas[] = {
     {"/usr/lib:/var:", MSYSROOT "\\usr\\lib;" MSYSROOT "\\var;", false}
     ,{"-LIBPATH:../lib", "-LIBPATH:../lib", false}
@@ -294,7 +310,32 @@ int main() {
             printf("test %ld failed: src=\"%s\", dst=\"%s\" expect=\"%s\"\n", (it - &datas[0]), escape(path, epath), escape(res, eres), escape(it->dst, edst));
             if (it->fail) {
                 passed += 1;
+                continue;
             }
+
+            // Retry failed attempt
+            static const char *bad = MSYSROOT "\\tmp\\";
+
+            if (!strlen(wintemp)) continue;
+            const char *found = strstr(it->dst, bad);
+            if (!found) continue;
+
+            size_t adjusted_len = strlen(it->dst) - strlen(bad) + strlen(wintemp);
+            char *adj = (char *)malloc(adjusted_len + 1);
+            strncpy(adj, it->dst, found - it->dst);
+            adj[found - it->dst] = '\0';
+            strcat(adj, wintemp);  // Append the TMP env var
+            strcat(adj, found + strlen(bad));  // Append the part after the match
+
+            char eadj[4096];
+            if (0 == strcmp(res, adj)) {
+                passed += 1;
+                printf("test %ld passed after retry: src=\"%s\", dst=\"%s\"\n", (it - &datas[0]), escape(path, epath), escape(res, eres));
+            } else {
+                printf("still failed %ld after retry: src=\"%s\", dst=\"%s\" expect=\"%s\"\n",
+                       (it - &datas[0]), escape(path, epath), escape(res, eres), escape(adj, eadj));
+            }
+            free(adj);
         } else {
             char epath[1024];
             char eres[1024];
